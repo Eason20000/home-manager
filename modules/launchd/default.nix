@@ -433,6 +433,11 @@ in
               verboseEcho "Starting agent '$domain/$agentName'"
               local bootstrap_output
               bootstrap_output=$(run /bin/launchctl bootstrap "$domain" "$dstPath" 2>&1) || {
+                if [[ "$bootstrap_output" == *"Domain does not support specified action"* ]]; then
+                  warnEcho "Skipping agent '$domain/$agentName': domain '$domain' does not exist"
+                  return 0
+                fi
+
                 if [[ "$bootstrap_output" == *"Bootstrap failed: 5: Input/output error"* ]]; then
                   errorEcho "Failed to start agent '$domain/$agentName' with I/O error (code 5)"
                   errorEcho "This typically happens when the agent wasn't unloaded before attempting to bootstrap the new agent."
